@@ -2,7 +2,9 @@ import numpy as np
 from inputs import cages, grid, killer_grid
 
 grid = grid
-cage_index = {}
+cage_index = {box: cage for cage in cages for box in cage[1]}
+# cage_index = {} # uncomment this line to use the killer_grid
+
 # sets the cage_index to None for all boxes that are not in a cage
 for y in range(9):
     for x in range(9):
