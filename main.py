@@ -1,40 +1,103 @@
 import numpy as np
-from inputs import sudoku, harder_sudoku, killer_sudoku, cages
-from UIHelper import init_view, update_view
+from inputs import cages, grid, killer_grid
 
-def solve(grid, cages = []):
-    empty_cells = [(i, j) for i in range(9) for j in range(9) if grid[i][j] == 0]
-    if not empty_cells:
-        print(np.matrix(grid))
-        return True
-    cell = min(empty_cells, key=lambda c: len(possible_values(c[0], c[1], grid, cages)))
-    for value in possible_values(cell[0], cell[1], grid, cages):
-        grid[cell[0]][cell[1]] = value
-        update_view(grid)
-        if solve(grid, cages):
+grid = grid
+cage_index = {}
+# sets the cage_index to None for all boxes that are not in a cage
+for y in range(9):
+    for x in range(9):
+        if (y, x) not in cage_index:
+            cage_index[(y, x)] = None
+
+
+def solve():
+    for y in range(9):
+        for x in range(9):
+            if grid[y][x] == 0:
+                for n in range(1, 10):
+                    if possible(y, x, n, grid, cage_index):
+                        grid[y][x] = n
+                        solve()
+                        grid[y][x] = 0
+                return
+    inverted_grid = grid
+    print(np.matrix(inverted_grid), end="\r")
+    input("Press for enter to continue searching ...")
+
+
+def is_duplicate_in_row(y, n, grid):
+    for i in range(0, 9):
+        if grid[y][i] == n:
             return True
-        grid[cell[0]][cell[1]] = 0
     return False
 
-def possible_values(y, x, grid, cages):
-    impossible_values = set(grid[y][i] for i in range(9))
-    impossible_values.update(grid[i][x] for i in range(9))
-    box_x = (x // 3) * 3
-    box_y = (y // 3) * 3
-    impossible_values.update(grid[i][j] for i in range(box_y, box_y+3) for j in range(box_x, box_x+3))
 
-    # TODO: check cages contraint
+def is_duplicate_in_column(x, n, grid):
+    for i in range(0, 9):
+        if grid[i][x] == n:
+            return True
+    return False
 
-    available_values = set(range(1, 10)) - impossible_values
-    return available_values
 
-def cage_is_full(cells, cell, grid):
-    """
-    check if all cells other than the provided one are empty
-    """
-    for c in cells:
-        if c != cell and grid[c[0]][c[1]] == 0:
+def is_duplicate_in_square(y, x, n, grid):
+    x0 = (x // 3) * 3
+    y0 = (y // 3) * 3
+    for i in range(0, 3):
+        for j in range(0, 3):
+            if grid[y0 + i][x0 + j] == n:
+                return True
+    return False
+
+
+def is_cage_rule_correct(y, x, n, grid, cage_index):
+    current_cage = cage_index[(y, x)]
+    cage_values = []
+
+    if not current_cage:
+        return True
+
+    for box_y, box_x in current_cage[1]:
+        if box_y == y and box_x == x:
+            cage_values.append(n)
+        else:
+            cage_values.append(grid[box_y][box_x])
+
+    current_sum = sum(cage_values)
+    if current_sum > current_cage[0]:
+        return False
+
+    all_valued = all(cage_values)
+    if all_valued:
+        # checks if the sum of the cage is correct
+        if current_sum != current_cage[0]:
             return False
+        # checks if there are duplicate values in the cage
+        double_values = len(cage_values) != len(set(cage_values))
+        if double_values:
+            return False
+
     return True
 
-solve(harder_sudoku, cages)
+
+def possible(y, x, n, grid, cage_index):
+    if is_duplicate_in_row(y, n, grid):
+        return False
+
+    if is_duplicate_in_column(x, n, grid):
+        return False
+
+    if is_duplicate_in_square(y, x, n, grid):
+        return False
+
+    if not is_cage_rule_correct(y, x, n, grid, cage_index):
+        return False
+
+    return True
+
+
+def invert_grid(grid):
+    # inverts x and y axis
+    return [[grid[j][i] for j in range(len(grid))] for i in range(len(grid[0]))]
+
+
+solve()
