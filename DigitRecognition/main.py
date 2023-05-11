@@ -26,7 +26,7 @@ model = keras.Sequential([
 
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=[tf.keras.metrics.AUC()])
 
-history = model.fit(x_train, y_train, epochs=4, batch_size=64, validation_data=(x_test, y_test))
+history = model.fit(x_train, y_train, epochs=3, batch_size=64, validation_data=(x_test, y_test))
 
 test_loss, test_auc = model.evaluate(x_test, y_test)
 

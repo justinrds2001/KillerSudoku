@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 
 # Load the trained model
-model = tf.keras.models.load_model('MNIST_2by2poolsize_5epochs.h5')
+model = tf.keras.models.load_model('final_model3epochs.h5')
 
 # Preprocess the image
 img = cv2.imread('C:/Users/diren/Downloads/pixil-frame-0.png', cv2.IMREAD_GRAYSCALE)
