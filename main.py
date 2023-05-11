@@ -1,7 +1,7 @@
 import numpy as np
 from inputs import cages, grid, killer_grid
 
-grid = grid
+grid = killer_grid
 cage_index = {box: cage for cage in cages for box in cage[1]}
 # cage_index = {} # uncomment this line to use the killer_grid
 
@@ -22,9 +22,8 @@ def solve():
                         solve()
                         grid[y][x] = 0
                 return
-    inverted_grid = grid
-    print(np.matrix(inverted_grid), end="\r")
-    input("Press for enter to continue searching ...")
+    inverted_grid = invert_grid(grid)
+    print(np.matrix(inverted_grid))
 
 
 def is_duplicate_in_row(y, n, grid):
